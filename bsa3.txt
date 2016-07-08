@@ -1,0 +1,429 @@
+https://github.com/JIamep14/bsa3
+
+=======================================================================================================================================================
+
+Сначала идут 3 задания с логами из гит баша. К 3 заданию есть 2 скриншота. Потом логи с баша с созданием репозитория по шаблону с задания.
+
+=======================================================================================================================================================
+
+1. Работа с историей изменений.
+
+Написать команду, которая выводит сообщения и автора всех коммитов из ветки develop-feature1, 
+которые сделаны за последние 3 часа и которых нет в родительских ветках (develop, master). Сортировка по дате, первые более новые.
+$ git log develop..develop-feature1 --since 3.h --pretty=format:"%an - %s"
+JIamep14 - t-6: Added DB conf file
+JIamep14 - t-5: Added new functional to index-develop.php
+
+Написать команду, которая выводит для каждого коммита из веток master, develop, 
+в сообщении которых есть упоминание заданного номера задачи (допустим задачи 231), 
+его сообщение, автора и дату. Сортировка по дате, первые более новые.
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git log 'master' 'develop' --grep "Created"
+commit 90a1a27d3d4bc04bf3ab3ea913482dd3c6aa4174
+Author: JIamep14 <meisme001@gmail.com>
+Date:   Fri Jul 8 18:04:47 2016 +0300
+
+    t-3: Created index-develop.php
+
+commit 7b96f45ab074771e224323f0acf4c9dba25c8391
+Author: JIamep14 <meisme001@gmail.com>
+Date:   Fri Jul 8 18:03:26 2016 +0300
+
+    t-2: Created index2.php
+
+commit ae58d3467656b80382983b51f9a9d326e0ca607e
+Author: JIamep14 <meisme001@gmail.com>
+Date:   Fri Jul 8 18:02:00 2016 +0300
+
+    t-1: Created index1.php
+
+=======================================================================================================================================================
+
+2. “Избирательное слияние”.
+Задание: как добавить в develop только ваш коммит, но чтобы 3 коммита после него в develop не попали?
+
+git cherry-pick позволяет скопировать в текущую ветку коммит по хэш-коду
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git checkout develop-feature2
+Switched to branch 'develop-feature2'
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git log --oneline
+cfed5d7 t-8: Added log file to project
+3e95f90 t-7: Added new functional to index-develop.php to conflict with develop-feature1 branch
+41c8173 Changed index-develop.php
+90a1a27 t-3: Created index-develop.php
+7b96f45 t-2: Created index2.php
+ae58d34 t-1: Created index1.php
+0019546 Initial commit
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git checkout master
+Switched to branch 'master'
+Your branch is up-to-date with 'origin/master'.
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git cherry-pick cfed5d7
+[master 2e90737] t-8: Added log file to project
+ Date: Fri Jul 8 18:12:16 2016 +0300
+ 1 file changed, 1 insertion(+)
+ create mode 100644 log.txt
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git log --oneline
+2e90737 t-8: Added log file to project
+7b96f45 t-2: Created index2.php
+ae58d34 t-1: Created index1.php
+0019546 Initial commit
+
+=======================================================================================================================================================
+
+3. “Исправление ошибок”.
+А вы об этом забыли и теперь на сервере лежит ветка develop-feature1с “плохими” сообщениями. 
+Задание: Предложите вариант, как наиболее просто исправить ситуацию, чтобы тим лид не увидел ваш промах.
+
+Для этого необходимо отредактировать сообщения коммитов с помощью 
+git commit --amend
+Эта команда позволит редактировать только последний коммит, поэтому, если 
+неудачный коммит в репозитории не последний - следует воспользоваться 
+git rebase -i HEAD~n где n - количество коммитов, к которым нужно получить доступ для редактирования.
+
+Было: https://pp.vk.me/c604317/v604317533/1703a/kwGu6mAeDqQ.jpg
+Стало: https://pp.vk.me/c604317/v604317533/17043/G6hr4CvPoc8.jpg
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git checkout -b develop-feature3
+Switched to a new branch 'develop-feature3'
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git status
+On branch develop-feature3
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   index1.php
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git commit -m 'df3 bad message 1'
+[develop-feature3 78792f2] df3 bad message 1
+ 1 file changed, 1 insertion(+)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git status
+On branch develop-feature3
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   index1.php
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git commit -m 'df3 bad message 2'
+[develop-feature3 fa4c5e2] df3 bad message 2
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git log --oneline
+fa4c5e2 df3 bad message 2
+78792f2 df3 bad message 1
+41c8173 Changed index-develop.php
+90a1a27 t-3: Created index-develop.php
+7b96f45 t-2: Created index2.php
+ae58d34 t-1: Created index1.php
+0019546 Initial commit
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git push origin develop-feature3
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 516 bytes | 0 bytes/s, done.
+Total 6 (delta 4), reused 0 (delta 0)
+To https://github.com/JIamep14/bsa3.git
+ * [new branch]      develop-feature3 -> develop-feature3
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git rebase -i HEAD~2
+Stopped at fc7fe5d... df3 bad message 1
+You can amend the commit now, with
+
+        git commit --amend
+
+Once you are satisfied with your changes, run
+
+        git rebase --continue
+
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3|REBASE-i 1/2)
+$ git commit --amend
+[detached HEAD fb910a8] t-9: Good message for commit in develop-feature3 branch1
+ Date: Fri Jul 8 21:33:02 2016 +0300
+ 1 file changed, 1 insertion(+)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3|REBASE-i 1/2)
+$ git rebase --continue
+Stopped at 524fa01... df3 bad message 2
+You can amend the commit now, with
+
+        git commit --amend
+
+Once you are satisfied with your changes, run
+
+        git rebase --continue
+
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3|REBASE-i 2/2)
+$ git commit --amend
+[detached HEAD 8c87946] t-10: Good commit message in develop-feature3 branch
+ Date: Fri Jul 8 21:33:22 2016 +0300
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3|REBASE-i 2/2)
+$ git rebase --continue
+Successfully rebased and updated refs/heads/develop-feature3.
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature3)
+$ git log --oneline
+d7765ef t-10: Good commit message in develop-feature3 branch
+719cc92 t-9: Good message for commit in develop-feature3 branch1
+5020ad2 t-4: Changed index-develop.php
+90a1a27 t-3: Created index-develop.php
+7b96f45 t-2: Created index2.php
+ae58d34 t-1: Created index1.php
+0019546 Initial commit
+
+=======================================================================================================================================================
+
+admin@admin-PC MINGW64 /c
+$ git clone https://github.com/JIamep14/bsa3.git
+Cloning into 'bsa3'...
+warning: You appear to have cloned an empty repository.
+Checking connectivity... done.
+
+admin@admin-PC MINGW64 /c
+$ cd bsa3
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git branch
+* master
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git status
+On branch master
+Your branch is up-to-date with 'origin/master'.
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        index1.php
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git commit -m 't-1: Created index1.php'
+[master ae58d34] t-1: Created index1.php
+ 1 file changed, 3 insertions(+)
+ create mode 100644 index1.php
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        index2.php
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git commit -m 't-2: Created index2.php'
+[master 7b96f45] t-2: Created index2.php
+ 1 file changed, 3 insertions(+)
+ create mode 100644 index2.php
+
+admin@admin-PC MINGW64 /c/bsa3 (master)
+$ git checkout -b develop
+Switched to a new branch 'develop'
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git status
+On branch develop
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        index-develop.php
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git commit -m 't-3: Created index-develop.php'
+[develop 90a1a27] t-3: Created index-develop.php
+ 1 file changed, 3 insertions(+)
+ create mode 100644 index-develop.php
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git status
+On branch develop
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   index-develop.php
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git commit -m 'Changed index-develop.php'
+[develop 41c8173] Changed index-develop.php
+ 1 file changed, 1 insertion(+)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git checkout -b develop-feature1
+Switched to a new branch 'develop-feature1'
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature1)
+$ git status
+On branch develop-feature1
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   index-develop.php
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature1)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature1)
+$ git commit -m 't-5: Added new functional to index-develop.php'
+[develop-feature1 85f857a] t-5: Added new functional to index-develop.php
+ 1 file changed, 1 insertion(+)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature1)
+$ git status
+On branch develop-feature1
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        database.php
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature1)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature1)
+$ git commit -m 't-6: Added DB conf file'
+[develop-feature1 64b9c71] t-6: Added DB conf file
+ 1 file changed, 6 insertions(+)
+ create mode 100644 database.php
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature1)
+$ git checkout develop
+Switched to branch 'develop'
+
+admin@admin-PC MINGW64 /c/bsa3 (develop)
+$ git checkout -b develop-feature2
+Switched to a new branch 'develop-feature2'
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git status
+On branch develop-feature2
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   index-develop.php
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git commit -m 't-7: Added new functional to index-develop.php to conflict with develop-feature1 branch'
+[develop-feature2 3e95f90] t-7: Added new functional to index-develop.php to conflict with develop-feature1 branch
+ 1 file changed, 1 insertion(+)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git status
+On branch develop-feature2
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        log.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git add .
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git commit -m 't-8: Added log file to project'
+[develop-feature2 cfed5d7] t-8: Added log file to project
+ 1 file changed, 1 insertion(+)
+ create mode 100644 log.txt
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git remote add origin https://github.com/JIamep14/bsa3.git
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git push origin master
+Counting objects: 9, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (7/7), done.
+Writing objects: 100% (9/9), 797 bytes | 0 bytes/s, done.
+Total 9 (delta 1), reused 0 (delta 0)
+To https://github.com/JIamep14/bsa3.git
+ * [new branch]      master -> master
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git push origin develop
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 668 bytes | 0 bytes/s, done.
+Total 6 (delta 2), reused 0 (delta 0)
+To https://github.com/JIamep14/bsa3.git
+ * [new branch]      develop -> develop
+
+admin@admin-PC MINGW64 /c/bsa3 (develop-feature2)
+$ git push origin --all
+Counting objects: 12, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (11/11), done.
+Writing objects: 100% (12/12), 1.19 KiB | 0 bytes/s, done.
+Total 12 (delta 5), reused 0 (delta 0)
+To https://github.com/JIamep14/bsa3.git
+ * [new branch]      develop-feature1 -> develop-feature1
+ * [new branch]      develop-feature2 -> develop-feature2
+
+======================================================================================================================================================
+
